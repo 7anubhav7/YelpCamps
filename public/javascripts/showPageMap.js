@@ -1,6 +1,7 @@
+
 mapboxgl.accessToken = mapToken;
 
-const campgroundData = JSON.parse(document.getElementById('map-data').dataset.campground)
+const campgroundData = JSON.parse(document.getElementById('map-data').dataset.campground);
 const map = new mapboxgl.Map({
 	container: 'map', // container ID
 	style: 'mapbox://styles/mapbox/streets-v12', // style URL
