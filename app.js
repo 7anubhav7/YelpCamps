@@ -1,8 +1,6 @@
-//if (process.env.NODE_ENV !== "production") {
-//    require('dotenv').config();
-//}
-
-require('dotenv').config();
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
 
 const sanitizeV5 = require('./utils/mongoSanitizeV5.js')
 const express = require('express')
@@ -19,11 +17,16 @@ const User = require('./models/user')
 const helmet = require('helmet')
 
 
+const dbUrl = process.env.DB_URL
+const MongoStore = require('connect-mongo');
+
+
 const userRoutes = require('./routes/users')
 const campgroundRoutes = require('./routes/campgrounds')
 const reviewRoutes = require('./routes/reviews')
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp')
+//dbUrl = 'mongodb://localhost:27017/yelp-camp'
+mongoose.connect(dbUrl)
 
 const db = mongoose.connection
 db.on("error", console.error.bind(console, "connection error"))
@@ -44,8 +47,21 @@ app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname,'public')))
 app.use(sanitizeV5({ replaceWith: '_' }))
 
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: 'thisshouldbeabettersecret!'
+    }
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
 //sessions
 const sessionConfig = {
+    store,
     name: 'session',
     secret: 'thisshouldbesecret',
     resave: false,
